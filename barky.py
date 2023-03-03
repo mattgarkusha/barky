@@ -27,7 +27,7 @@ This modular design, which separates concerns, provides opportunities for extens
 """
 import os
 
-import commands
+import services.commands
 
 
 class Option:
@@ -125,29 +125,29 @@ def loop():
     options = {
         "A": Option(
             "Add a bookmark",
-            commands.AddBookmarkCommand(),
+            services.commands.AddBookmarkCommand(),
             prep_call=get_new_bookmark_data,
         ),
-        "B": Option("List bookmarks by date", commands.ListBookmarksCommand()),
+        "B": Option("List bookmarks by date", services.commands.ListBookmarksCommand()),
         "T": Option(
-            "List bookmarks by title", commands.ListBookmarksCommand(order_by="title")
+            "List bookmarks by title", services.commands.ListBookmarksCommand(order_by="title")
         ),
         "E": Option(
             "Edit a bookmark",
-            commands.EditBookmarkCommand(),
+            services.commands.EditBookmarkCommand(),
             prep_call=get_new_bookmark_info,
         ),
         "D": Option(
             "Delete a bookmark",
-            commands.DeleteBookmarkCommand(),
+            services.commands.DeleteBookmarkCommand(),
             prep_call=get_bookmark_id_for_deletion,
         ),
         "G": Option(
             "Import GitHub stars",
-            commands.ImportGitHubStarsCommand(),
+            services.commands.ImportGitHubStarsCommand(),
             prep_call=get_github_import_options,
         ),
-        "Q": Option("Quit", commands.QuitCommand()),
+        "Q": Option("Quit", services.commands.QuitCommand()),
     }
     print_options(options)
 
@@ -159,7 +159,7 @@ def loop():
 
 # this ensures that this module runs first
 if __name__ == "__main__":
-    commands.CreateBookmarksTableCommand().execute()
+    services.commands.CreateBookmarksTableCommand().execute()
 
     # endless program loop
     while True:

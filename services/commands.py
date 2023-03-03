@@ -8,10 +8,13 @@ from datetime import datetime
 
 import requests
 
-from database import DatabaseManager
+from services.database import DatabaseManager
+from repository.sqla_repository import SQLARespository
+from repository.models import BookmarkModel
 
 # module scope
 db = DatabaseManager("bookmarks.db")
+repo = SQLARespository("sqlite:///bookmarks.db")
 
 
 class Command(ABC):
@@ -39,50 +42,31 @@ class CreateBookmarksTableCommand(Command):
 
 
 class AddBookmarkCommand(Command):
-    """
-    This class will:
-
-    1. Expect a dictionary containing the title, URL, and (optional) notes information for a bookmark.
-    2. Add the current datetime to the dictionary as date_added.
-    3. Insert the data into the bookmarks table using the DatabaseManager.add method.
-    4. Return a success message that will eventually be displayed by the presentation layer.
-    """
-
     def execute(self, data, timestamp=None):
         data["date_added"] = datetime.utcnow().isoformat()
+        repo.add_one(data)
         return "Bookmark added!"
 
 
 class ListBookmarksCommand(Command):
-    """
-    We need to review the bookmarks in the database.
-    To do so, this class will:
-    1. Accept the column to order by, and save it as an instance attribute.
-    2. Pass this information along to db.select in its execute method.
-    3. Return the result (using the cursor’s .fetchall() method) because select is a query.
-    """
-
+    
     def __init__(self, order_by="date_added"):
         self.order_by = order_by
 
     def execute(self, data=None):
-        return db.select("bookmarks", order_by=self.order_by).fetchall()
+        return repo.find_all(query=None)
 
 
 class DeleteBookmarkCommand(Command):
-    """
-    We also need to remove bookmarks.
-    """
+
 
     def execute(self, data):
-        db.delete("bookmarks", {"id": data})
+        repo.delete_one(data)
         return "Bookmark deleted!"
 
 
 class ImportGitHubStarsCommand(Command):
-    """
-    Import starred repos in Github - credit Dane Hillard
-    """
+
     def _extract_bookmark_info(self, repo):
         return {
             "title": repo["name"],
@@ -113,22 +97,17 @@ class ImportGitHubStarsCommand(Command):
                     timestamp = None
 
                 bookmarks_imported += 1
-                AddBookmarkCommand().execute(
-                    self._extract_bookmark_info(repo),
-                    timestamp=timestamp,
-                )
+                bookmark = BookmarkModel(self._extract_bookmark_info(repo))
+                bookmark.created_date = timestamp
+                
+                repo.add_one(bookmark)
 
         return f"Imported {bookmarks_imported} bookmarks from starred repos!"
 
 
 class EditBookmarkCommand(Command):
     def execute(self, data):
-        print(data.data)
-        db.update(
-            "bookmarks",
-            {"id": data["id"]},
-            data["update"],
-        )
+        repo.update(data)
         return "Bookmark updated!"
 
 

@@ -156,4 +156,3 @@ class DatabaseManager:
             tuple(criteria.values()),
         )
 
-
