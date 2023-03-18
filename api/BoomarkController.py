@@ -1,8 +1,10 @@
 from flask import jsonify, request
 from app import app
 from services.BookmarkService import BookmarkService
+from services.UnitOfWork import UnitOfWork
 
-bookmark_service = BookmarkService()
+uow = UnitOfWork()
+bookmark_service = BookmarkService(uow)
 
 @app.route('/api/bookmarks', methods=['GET'])
 def list_bookmarks():
