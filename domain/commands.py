@@ -32,3 +32,7 @@ class EditBookmarkCommand(Command):
     title: str
     url: str
     notes: Optional[str] = None
+
+@dataclass
+class ImportGithubBookmarksCommand(Command):
+    username: str

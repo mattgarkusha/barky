@@ -72,7 +72,8 @@ def delete_bookmark(id):
     return jsonify(bookmark)
 
 
-# @app.route('/api/bookmarks/import-github/<string:username>', methods=['GET'])
-# def import_github_bookmarks(username):
-#     bookmark_service.import_github_stars(username)
-#     return jsonify({'success': 'true'})
+@app.route('/api/bookmarks/import-github/<string:username>', methods=['GET'])
+def import_github_bookmarks(username):
+    cmd = ImportGithubBookmarksCommand(username=username)
+    message_bus.handle(message=cmd, uow= unit_of_work.SqlAlchemyUnitOfWork())[0]
+    return jsonify({'success': 'true'})

@@ -1,36 +1,73 @@
+# pylint: disable=redefined-outer-name
+import time
+from pathlib import Path
+
 import pytest
+import requests
+from requests.exceptions import ConnectionError
+from sqlalchemy.exc import OperationalError
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, clear_mappers
+
 from api.flaskapi import app
-from adapters import orm
-from domain.model import Bookmark
-from datetime import datetime
-from sqlalchemy.orm import sessionmaker
-from config import TestingConfig
 
-@pytest.fixture(scope="session")
-def create_test_data():
-    app.config.from_object(TestingConfig)
+from adapters.orm import mapper_registry, start_mappers
+from config import Config
 
-    # Create tables
-    with app.app_context():
-        orm.create_tables()
+Config.TESTING = True
 
-    Session = sessionmaker(bind=orm.engine)
-    session = Session()
 
-    now = datetime.now()
-    session.add(Bookmark(id=1000, title='GitHub', url='https://github.com', notes='Git repository hosting service', created_at=now, updated_at=now))
-    session.add(Bookmark(id=2000, title='Flask', url='https://palletsprojects.com/p/flask/', notes='Web application framework', created_at=now, updated_at=now))
-    session.add(Bookmark(id=3000, title='Google', url='https://google.com', notes='You know, for search.', created_at=now, updated_at=now))
-    session.add(Bookmark(id=4000, title='Microsoft', url='https://microsoft.com', notes='For computers', created_at=now, updated_at=now))
-    session.commit()
+@pytest.fixture
+def in_memory_db():
+    engine = create_engine("sqlite:///:memory:")
+    mapper_registry.metadata.create_all(engine)
+    return engine
 
-    yield
-      
-      # Drop tables
-    with app.app_context():
-        orm.drop_tables()
+
+@pytest.fixture
+def session_factory(in_memory_db):
+    start_mappers()
+    yield sessionmaker(bind=in_memory_db)
+    clear_mappers()
+
+
+@pytest.fixture
+def session(session_factory):
+    return session_factory()
+
+
+def wait_for_postgres_to_come_up(engine):
+    deadline = time.time() + 10
+    while time.time() < deadline:
+        try:
+            return engine.connect()
+        except OperationalError:
+            time.sleep(0.5)
+    pytest.fail("Postgres never came up")
+
+
+def wait_for_webapp_to_come_up():
+    deadline = time.time() + 10
+    url = TestingConfig.API_URL
+    while time.time() < deadline:
+        try:
+            return requests.get(url)
+        except ConnectionError:
+            time.sleep(0.5)
+    pytest.fail("API never came up")
+
+
+
+@pytest.fixture
+def restart_api():
+    (Path(__file__).parent / "../src/allocation/entrypoints/flask_app.py").touch()
+    time.sleep(0.5)
+    wait_for_webapp_to_come_up()
 
 @pytest.fixture
 def client():
+    app.config['TESTING'] = True
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+
     with app.test_client() as client:
         yield client

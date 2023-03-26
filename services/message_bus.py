@@ -76,4 +76,5 @@ COMMAND_HANDLERS = {
     commands.DeleteBookmarkCommand: handlers.delete_bookmark,
     commands.EditBookmarkCommand: handlers.edit_bookmark,
     commands.GetBookmarkByIdCommand: handlers.get_bookmark_by_id,
+    commands.ImportGithubBookmarksCommand: handlers.import_github_stars,
 }  # type: Dict[Type[commands.Command], Callable]

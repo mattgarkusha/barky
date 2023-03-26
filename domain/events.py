@@ -47,3 +47,7 @@ class BookmarkDeleted(Event):
 @dataclass
 class BookmarkGottenByID(Event):
     bookmark: Bookmark
+
+@dataclass
+class ImportedGithhubBookmarks(Event):
+    bookmarks: List[Bookmark]

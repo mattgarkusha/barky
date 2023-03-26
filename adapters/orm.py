@@ -19,7 +19,11 @@ from config import Config
 
 mapper_registry = registry()
 
-engine = create_engine(Config.SQLALCHEMY_DATABASE_URI, echo=True)
+
+if Config.TESTING:
+    engine = create_engine("sqlite:///:memory:", echo=True)
+else:
+    engine = create_engine(Config.SQLALCHEMY_DATABASE_URI, echo=True)
 
 bookmarks = Table(
     "bookmarks",
