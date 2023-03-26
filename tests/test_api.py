@@ -1,11 +1,11 @@
 import json
-from app import app
+from api.flaskapi import app
 
-def test_get_all_bookmarks(client):
+def test_get_all_bookmarks(client, create_test_data):
     response = client.get('/api/bookmarks')
     assert response.status_code == 200
 
-def test_get_all_bookmarks_sorted_by_title(client):
+def test_get_all_bookmarks_sorted_by_title(client, create_test_data):
     response = client.get('/api/bookmarks/by-title')
     assert response.status_code == 200
     assert len(response.json) == 4
@@ -14,7 +14,7 @@ def test_get_all_bookmarks_sorted_by_title(client):
     assert response.json[2]['title'] == 'Google'
     assert response.json[3]['title'] == 'Microsoft'
 
-def test_get_all_bookmarks_sorted_by_created_date(client):
+def test_get_all_bookmarks_sorted_by_created_date(client, create_test_data):
     response = client.get('/api/bookmarks/by-created-date')
     assert response.status_code == 200
     assert len(response.json) == 4

@@ -1,7 +1,7 @@
-from domain.Bookmark import Bookmark
+from domain.model import Bookmark
 from datetime import datetime
 import requests
-from .UnitOfWork import UnitOfWork
+from .unit_of_work import UnitOfWork
 
 class BookmarkService:
     def __init__(self, uow: UnitOfWork):
