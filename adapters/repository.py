@@ -42,15 +42,15 @@ class SqlAlchemyRepository(AbstractRepository):
             else:
                 query = query.order_by(sort_attr)
         bookmarks = query.all()
-        # for bookmark in bookmarks:
-        #     self.seen.add(bookmark)
+        for bookmark in bookmarks:
+            self.seen.add(bookmark)
         print(bookmarks)
         return bookmarks
 
     def get_by_id(self, id) -> Bookmark:
         bookmark = self.session.get(Bookmark, id)
-        # if bookmark:
-        #     self.seen.add(bookmark)
+        if bookmark:
+            self.seen.add(bookmark)
         return bookmark
 
     def create(self, bookmark: Bookmark) -> Bookmark:
@@ -59,22 +59,22 @@ class SqlAlchemyRepository(AbstractRepository):
         bookmark.updated_at = now
         self.session.add(bookmark)
         self.session.commit()
-        # if bookmark:
-        #     self.seen.add(bookmark)
+        if bookmark:
+            self.seen.add(bookmark)
         return bookmark
 
     def update(self, bookmark: Bookmark) -> Bookmark:
         now = datetime.now()
         bookmark.updated_at = now
         self.session.commit()
-        # if bookmark:
-        #     self.seen.add(bookmark)
+        if bookmark:
+            self.seen.add(bookmark)
         return bookmark
 
     def delete(self, id) -> Bookmark:
         bookmark = self.get_by_id(id)
         self.session.delete(bookmark)
         self.session.commit()
-        # if bookmark:
-        #     self.seen.add(bookmark)
+        if bookmark:
+            self.seen.add(bookmark)
         return bookmark

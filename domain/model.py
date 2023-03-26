@@ -11,7 +11,6 @@ class Bookmark:
     notes: str
     created_at: datetime
     updated_at: datetime
-    events: List
     
     def __init__(
         self,
