@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 import requests
 
-from domain import commands, events, model
+from domain import commands, model
 
 if TYPE_CHECKING:
     from . import unit_of_work
@@ -16,27 +16,6 @@ def add_bookmark(
         result = uow.bookmarks_repo.create(bookmark)         
         uow.commit()
         return result.to_dict()
-
-# ListBookmarksCommand
-def list_bookmarks(
-    cmd: commands.ListBookmarksCommand,
-    uow: unit_of_work.AbstractUnitOfWork,
-):
-    with uow:
-        bookmarks = uow.bookmarks_repo.get_all(sort_field=cmd.sort_order)
-        results = []
-        for bookmark in bookmarks:
-            results.append(bookmark.to_dict())
-        return results
-
-# GetBookmarkByID: id: int
-def get_bookmark_by_id(
-    cmd: commands.DeleteBookmarkCommand,
-    uow: unit_of_work.AbstractUnitOfWork,
-):
-    with uow:
-        bookmark = uow.bookmarks_repo.get_by_id(cmd.id)
-        return bookmark.to_dict()
 
 
 # DeleteBookmarkCommand: id: int

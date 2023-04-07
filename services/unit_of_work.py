@@ -1,6 +1,8 @@
 from adapters.repository import SqlAlchemyRepository
 from abc import ABC, abstractmethod
 from adapters.repository import AbstractRepository
+from typing import  List
+from domain.events import Event
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -66,3 +68,6 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
 
     def rollback(self):
         self.session.rollback()
+
+    def collect_new_events(self) -> List[Event]:
+        return [] 

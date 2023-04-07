@@ -12,19 +12,9 @@ class AddBookmarkCommand(Command):
     url: str
     notes: Optional[str] = None
 
-
-@dataclass
-class ListBookmarksCommand(Command):
-    sort_order: Optional[str] = None
-
 @dataclass
 class DeleteBookmarkCommand(Command):
     id: int
-
-@dataclass
-class GetBookmarkByIdCommand(Command):
-    id: int
-
 
 @dataclass
 class EditBookmarkCommand(Command):
